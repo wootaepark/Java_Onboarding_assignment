@@ -37,7 +37,7 @@ public class AuthService {
 
 		User newUser = User.builder()
 			.username(signupRequest.getUsername())
-			.password(signupRequest.getPassword())
+			.password(encodedPassword)
 			.nickname(signupRequest.getNickname())
 			.role(UserRole.ROLE_USER)
 			.build();

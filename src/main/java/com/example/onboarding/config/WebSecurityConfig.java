@@ -71,8 +71,8 @@ public class WebSecurityConfig {
 				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
 		);
 
-		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class); // JWT 인가 필터
-		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // 로그인 필터
+		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class); // JWT 인가 필터 (인가)
+		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // 로그인 필터 (인증)
 
 		return http.build();
 
