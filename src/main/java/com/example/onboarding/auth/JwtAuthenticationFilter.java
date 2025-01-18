@@ -24,9 +24,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	public JwtAuthenticationFilter(JwtUtil jwtUtil) {
 		this.jwtUtil = jwtUtil;
-		//setFilterProcessesUrl("/auth/signin");
-		// 위 주석 해제 시 header 에 토큰 부여
-		// 이후 컨트롤러 실행 안됨
+		setFilterProcessesUrl("/auth/signin");
 
 	}
 
@@ -36,7 +34,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		HttpServletResponse response) throws
 		AuthenticationException {
 		try {
-			SigninReqDto signinRequest = new ObjectMapper().readValue(request.getInputStream(), SigninReqDto.class);
+
+			SigninReqDto signinRequest = new ObjectMapper().readValue(request.getInputStream(),
+				SigninReqDto.class);
 			UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
 				new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword());
 			return getAuthenticationManager().authenticate(usernamePasswordAuthenticationToken);
@@ -57,6 +57,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		UserRole role = ((UserDetailsImpl)authResult.getPrincipal()).getUser().getRole();
 		String token = jwtUtil.createToken(userId, username, nickname, role);
 		response.setHeader("Authorization", token);
+		// 응답 body에 JWT 포함
+		response.setStatus(HttpServletResponse.SC_OK);  // HTTP 상태 200 OK
+		response.setContentType("application/json");  // 응답 콘텐츠 타입을 JSON으로 설정
+
+		// JSON 형태로 토큰 반환
+		String jsonResponse = "{\"token\":\"" + token + "\"}";
+		response.getWriter().write(jsonResponse);
+		//chain.doFilter(request, response);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.example.onboarding.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +26,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/auth/signin")
-	public SigninResDto signin(@RequestBody SigninReqDto signinRequest) {
-		return authService.signin(signinRequest);
+	public ResponseEntity<SigninResDto> signin(@RequestBody SigninReqDto signinRequest) {
+		return ResponseEntity.status(HttpStatus.OK).body(authService.signin(signinRequest));
 	}
 
 	// 인증, 인가 필터가 정상적으로 동작하는지 확인하기 위한 컨트롤러 
