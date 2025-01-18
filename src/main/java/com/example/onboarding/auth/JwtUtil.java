@@ -26,7 +26,9 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtUtil {
 
 	private static final String BEARER_PREFIX = "Bearer ";
-	private static final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+	private static final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
+	private static final long REFRESH_TOKEN_TIME = 24 * 7 * 60 * 60 * 1000L;
+
 	private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 	@Value("${jwt.secret.key}")
 	private String secretKey;
@@ -38,7 +40,7 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes);
 	}
 
-	public String createToken(Long userId, String username, String nickname, UserRole userRole) {
+	public String createAccessToken(Long userId, String username, String nickname, UserRole userRole) {
 		Date date = new Date();
 
 		return BEARER_PREFIX +
@@ -47,7 +49,19 @@ public class JwtUtil {
 				.claim("username", username)
 				.claim("userRole", userRole)
 				.claim("nickname", nickname)
-				.setExpiration(new Date(date.getTime() + TOKEN_TIME))
+				.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+				.setIssuedAt(date) // 발급일
+				.signWith(key, signatureAlgorithm) // 암호화 알고리즘
+				.compact();
+	}
+
+	public String createRefreshToken(Long userId) {
+		Date date = new Date();
+
+		return BEARER_PREFIX +
+			Jwts.builder()
+				.setSubject(String.valueOf(userId))
+				.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
 				.setIssuedAt(date) // 발급일
 				.signWith(key, signatureAlgorithm) // 암호화 알고리즘
 				.compact();
@@ -58,14 +72,6 @@ public class JwtUtil {
 			return tokenValue.substring(7);
 		}
 		throw new IllegalArgumentException("Not Found Token");
-	}
-
-	public Claims extractClaims(String token) {
-		return Jwts.parserBuilder()
-			.setSigningKey(key)
-			.build()
-			.parseClaimsJws(token)
-			.getBody();
 	}
 
 	public Claims getUserInfoFromToken(String token) {

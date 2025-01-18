@@ -55,16 +55,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		String username = ((UserDetailsImpl)authResult.getPrincipal()).getUser().getUsername();
 		String nickname = ((UserDetailsImpl)authResult.getPrincipal()).getUsername();
 		UserRole role = ((UserDetailsImpl)authResult.getPrincipal()).getUser().getRole();
-		String token = jwtUtil.createToken(userId, username, nickname, role);
-		response.setHeader("Authorization", token);
+		String accessToken = jwtUtil.createAccessToken(userId, username, nickname, role);
+		String refreshToken = jwtUtil.createRefreshToken(userId);
+		response.setHeader("Authorization", accessToken);
 		// 응답 body에 JWT 포함
 		response.setStatus(HttpServletResponse.SC_OK);  // HTTP 상태 200 OK
 		response.setContentType("application/json");  // 응답 콘텐츠 타입을 JSON으로 설정
 
 		// JSON 형태로 토큰 반환
-		String jsonResponse = "{\"token\":\"" + token + "\"}";
+		String jsonResponse = "{\"accessToken\":\"" + accessToken + "\"}";
+		//String jsonResponse = "{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}";
 		response.getWriter().write(jsonResponse);
-		//chain.doFilter(request, response);
 	}
 
 	@Override

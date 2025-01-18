@@ -13,6 +13,7 @@ import com.example.onboarding.entity.User;
 import com.example.onboarding.enums.UserRole;
 import com.example.onboarding.repository.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,11 +58,20 @@ public class AuthService {
 			throw new IllegalArgumentException("잘못된 비밀번호 입니다.");
 		}
 
-		String bearerToken = jwtUtil.createToken(user.getId(), user.getUsername(), user.getNickname(),
+		String bearerToken = jwtUtil.createAccessToken(user.getId(), user.getUsername(), user.getNickname(),
 			user.getRole());
 
 		System.out.println("bearerToken : " + bearerToken);
 
 		return new SigninResDto(bearerToken);
+	}
+
+	public String refreshToken(String token) {
+		Claims claims = jwtUtil.getUserInfoFromToken(token);
+		Long userId = Long.valueOf(claims.getSubject());
+		if (jwtUtil.validateToken(token)) {
+			return jwtUtil.createRefreshToken(userId);
+		} else
+			throw new IllegalArgumentException("refresh token not valid");
 	}
 }
